@@ -235,6 +235,141 @@ Use unicode symbols like ├ and └ for clarity. Sort tasks by start time.
             print(f"Error getting AI analysis for {employee_name}: {e}")
             return (employee_name,True)
     
+    def generate_analysis_message(self, employee_name, last_day_entries):
+        """Generate formatted analysis message from timesheet entries"""
+        if not last_day_entries:
+            return f"👤 {employee_name} (Total: 0h 0m)\n└ No entries found"
+        
+        # Get total duration from the first entry (since it's a merged cell)
+        total_duration = last_day_entries[0].get('total_duration', '0:00')
+        
+        # Convert duration to hours format (assuming format like "06:45" or "6:45")
+        def duration_to_hours(duration_str):
+            if not duration_str or duration_str.strip() == '':
+                return 0.0
+            try:
+                # Handle formats like "06:45" or "6:45"
+                if ':' in duration_str:
+                    hours, minutes = duration_str.split(':')
+                    return float(hours) + float(minutes) / 60
+                else:
+                    return float(duration_str)
+            except (ValueError, AttributeError):
+                return 0.0
+        
+        def calculate_task_duration(start, end):
+            if not start or not end:
+                return 0.0
+            try:
+                # Parse time format like "09:15" and "12:45"
+                start_parts = start.split(':')
+                end_parts = end.split(':')
+                
+                start_minutes = int(start_parts[0]) * 60 + int(start_parts[1])
+                end_minutes = int(end_parts[0]) * 60 + int(end_parts[1])
+                
+                duration_minutes = end_minutes - start_minutes
+                return duration_minutes / 60.0
+            except (ValueError, IndexError):
+                return 0.0
+
+        def format_duration(hours_decimal):
+            """Convert decimal hours to hours and minutes format"""
+            if hours_decimal == 0:
+                return "0h 0m"
+            
+            hours = int(hours_decimal)
+            minutes = int((hours_decimal - hours) * 60)
+            
+            if hours == 0:
+                return f"{minutes}m"
+            elif minutes == 0:
+                return f"{hours}h"
+            else:
+                return f"{hours}h {minutes}m"
+
+        total_hours = duration_to_hours(total_duration)
+        
+        # Group entries by activity type
+        activity_groups = {}
+        
+        for entry in last_day_entries:
+            activity_type = entry.get('activity_type', 'Task')
+            
+            if activity_type not in activity_groups:
+                activity_groups[activity_type] = []
+            
+            # Calculate individual task duration
+            start_time = entry.get('start_time', '')
+            end_time = entry.get('end_time', '')
+            task_duration = calculate_task_duration(start_time, end_time)
+            
+            # Get task details
+            task_details = entry.get('task_details', 'No details')
+            module_area = entry.get('module_area', '')
+            
+            # Prefer module_area over task_details for description
+            if module_area and module_area.strip():
+                description = module_area
+            else:
+                description = task_details
+            
+            activity_groups[activity_type].append({
+                'description': description,
+                'duration': task_duration
+            })
+        
+        # Format the header
+        message = f"\n👤 {employee_name} (Total: {format_duration(total_hours)})\n"
+        
+        # Process grouped activities
+        activity_types = list(activity_groups.keys())
+        
+        for i, activity_type in enumerate(activity_types):
+            tasks = activity_groups[activity_type]
+            
+            # Combine descriptions and calculate total duration for this activity type
+            descriptions = []
+            total_activity_duration = 0.0
+            
+            for task in tasks:
+                desc = task['description']
+                duration = task['duration']
+                
+                # Truncate individual descriptions if too long
+                if len(desc) > 40:
+                    desc = desc[:37] + "..."
+                
+                descriptions.append(f"{desc} ({format_duration(duration)})")
+                total_activity_duration += duration
+            
+            # Combine all descriptions for this activity type
+            combined_desc = ", ".join(descriptions)
+            
+            # Use appropriate tree symbol
+            if i == len(activity_types) - 1:
+                symbol = "└"
+            else:
+                symbol = "├"
+            
+            message += f"{symbol} {activity_type} – {combined_desc}\n"
+        
+        # Add remarks summary if available
+        remarks_list = []
+        for entry in last_day_entries:
+            remarks = entry.get('remarks', '').strip()
+            if remarks:
+                remarks_list.append(remarks)
+        
+        if remarks_list:
+            # Combine all remarks
+            all_remarks = "; ".join(remarks_list)
+            if len(all_remarks) > 100:
+                all_remarks = all_remarks[:97] + "..."
+            message += f"📝 Additional: {all_remarks}\n"
+        
+        return message.rstrip()
+    
     def verify_all_employees(self):
         """Verify all employee sheets and return analysis results"""
         results = []
@@ -258,8 +393,7 @@ Use unicode symbols like ├ and └ for clarity. Sort tasks by start time.
             print(f"Found {len(last_day_entries)} entries for {engineer_name} on {last_working_day}")
             if last_day_entries:
                 # Analyze the data
-                # analysis = self.analyze_employee_data(engineer_name, last_day_entries)
-                analysis = ""
+                analysis = self.generate_analysis_message(engineer_name, last_day_entries)
                 results.append(analysis)
             else:
                 results.append((engineer_name, False))
@@ -349,10 +483,10 @@ Use unicode symbols like ├ and └ for clarity. Sort tasks by start time.
         # Find employees who need to be reminded (no data or poor performance)
         employees_to_remind = []
         summary_message=f"📊 Daily Task Report Summary - {today} \n"
-        for data,status in results:
-            if not status:
-                employees_to_remind.append(data)
-                summary_message +=data  +"❌ Not Added \n"
+        for data in results:
+            if isinstance(data, tuple) and not data[1]:
+                employees_to_remind.append(data[0])
+                summary_message +=data[0]  +"❌ Not Added \n"
             else:
                 summary_message +=data+"\n"
         
