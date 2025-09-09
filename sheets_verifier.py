@@ -144,6 +144,7 @@ class SheetsVerifier:
                         'activity_type': task_row[5] if len(task_row) > 5 else '',  # Column F
                         'start_time': task_row[6] if len(task_row) > 6 else '',  # Column G
                         'end_time': task_row[7] if len(task_row) > 7 else '',  # Column H
+                        'total_duration': task_row[9] if len(task_row) > 9 else '',  # Column J
                         'remarks': task_row[10] if len(task_row) > 10 else ''  # Column K
                     }
                     
@@ -152,8 +153,9 @@ class SheetsVerifier:
                         target_entries.append(entry)
                         print(f"  Added task from row {j + 1}: {entry['task_details'][:50]}...")
                 
-                # Move to the row after the processed block
-                i = min(i + rows_to_check, len(sheet_data))
+                # Return immediately once entries are found and processed
+                print(f"Total entries found for {target_date}: {len(target_entries)}")
+                return target_entries
             else:
                 i += 1
         
