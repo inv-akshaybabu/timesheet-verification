@@ -482,7 +482,7 @@ Use unicode symbols like ├ and └ for clarity. Sort tasks by start time.
         
         # Find employees who need to be reminded (no data or poor performance)
         employees_to_remind = []
-        summary_message=f"📊 Daily Task Report Summary - {today} \n"
+        summary_message=f"📊 Daily Task Report Summary - {last_working_day} \n"
         for data in results:
             if isinstance(data, tuple) and not data[1]:
                 employees_to_remind.append(data[0])
