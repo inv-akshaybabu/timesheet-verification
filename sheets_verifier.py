@@ -152,6 +152,24 @@ class SheetsVerifier:
                     if entry['task_details'].strip() or entry['module_area'].strip():
                         target_entries.append(entry)
                         print(f"  Added task from row {j + 1}: {entry['task_details'][:50]}...")
+                    elif entry['start_time'].strip() and entry['end_time'].strip() and target_entries:
+                        # This indicates additional time for the previous task
+                        # Use the previous entry's details but with current time
+                        previous_entry = target_entries[-1]
+                        additional_entry = {
+                            'row_number': entry['row_number'],
+                            'date': entry['date'],
+                            'module_area': previous_entry['module_area'],
+                            'task_details': previous_entry['task_details'],
+                            'status': previous_entry['status'],
+                            'activity_type': previous_entry['activity_type'],
+                            'start_time': entry['start_time'],
+                            'end_time': entry['end_time'],
+                            'total_duration': entry['total_duration'],
+                            'remarks': entry['remarks']
+                        }
+                        target_entries.append(additional_entry)
+                        print(f"  Added additional time entry from row {j + 1} for previous task: {previous_entry['task_details'][:50]}...")
                 
                 # Return immediately once entries are found and processed
                 print(f"Total entries found for {target_date}: {len(target_entries)}")
