@@ -41,7 +41,7 @@ class SheetsVerifier:
         current_day = today.weekday()  # 0=Monday, 6=Sunday
 
         # Skip if today is weekend
-        if current_day in [5, 6]:  # Monday or Sunday
+        if current_day in [5, 6]:
             return None
 
         # Find the last working day
@@ -268,7 +268,7 @@ Use unicode symbols like ├ and └ for clarity. Sort tasks by start time.
 
         return self._get_ai_analysis(employee_name, prompt)
 
-    def _get_ai_analysis(self, employee_name, prompt):
+    def _get_ai_analysis(self, prompt):
         """Get AI analysis using OpenAI client with OpenRouter"""
         try:
             completion = self.openai_client.chat.completions.create(
@@ -277,16 +277,16 @@ Use unicode symbols like ├ and └ for clarity. Sort tasks by start time.
                     "X-Title": SITE_NAME,
                 },
                 model=AI_MODEL,
-                messages=[{"role": "user", "content": prompt}],
+                messages=[
+                    {"role": "user", "content": prompt}],
             )
-
             ai_response = completion.choices[0].message.content
 
-            return ai_response, True
+            return ai_response
 
         except Exception as e:
-            print(f"Error getting AI analysis for {employee_name}: {e}")
-            return (employee_name, True)
+            print(f"Error getting AI analysis: {e}")
+            return ""
 
     def generate_analysis_message(self, employee_name, last_day_entries):
         """Generate formatted analysis message from timesheet entries"""
@@ -482,9 +482,9 @@ Use unicode symbols like ├ and └ for clarity. Sort tasks by start time.
             print(f"Error sending message to Google Chat: {e}")
             return False
 
-    def send_employee_reminder(self, employees_to_remind):
+    def send_employee_reminder(self, employees_to_remind,ai_message):
         """Send reminder message to employees who haven't submitted timesheets"""
-        if not employees_to_remind or not EMPLOYEE_ALERT_WEBHOOK_URL:
+        if  not EMPLOYEE_ALERT_WEBHOOK_URL:
             return False
 
         # Create mentions for employees with chat IDs
@@ -506,13 +506,17 @@ Use unicode symbols like ├ and └ for clarity. Sort tasks by start time.
         # Build message with proper mentions
         if employee_mentions:
             message = f'Dear {", ".join(employee_mentions)},\n\n'
+            message += "\nPlease update your timesheet for the last working day. ✅"
         else:
             message = "Dear team,\n\n"
-
-        message += "This is a friendly reminder to update your time sheets. "
-        message += "It is important to keep our records accurate and up-to-date.\n\n"
-        message += "Thank you for your attention to this matter.\n\n"
-        message += "Best regards"
+        if ai_message:
+            message += f"\n📢 Dev News {self.get_current_day()}"
+            message += "\n"
+            message += "*" * 95
+            message += "\n"
+            message += ai_message
+        else:
+            message += "\nNo Dev News for today"
 
         # Send message with mentions if available
         return self.send_google_chat_message(message, EMPLOYEE_ALERT_WEBHOOK_URL)
@@ -540,15 +544,33 @@ Use unicode symbols like ├ and └ for clarity. Sort tasks by start time.
                 summary_message += data[0] + "❌ Not Added \n"
             else:
                 summary_message += data + "\n"
+        prompt = """
+You are a friendly tech news bot for our developer group chat. Generate a short daily update focused on full-stack development.
 
+Guidelines:
+
+Include 3–4 key updates (latest releases, tools, frameworks, or best practices).
+
+Format each as a bullet with an emoji + short bolded title + one-line explanation.
+
+After each update, add a reference link in parentheses with the official source (e.g., release notes, docs, blog).
+
+Keep it clear, concise, and under 150 words.
+
+Use Google Chat–friendly formatting (*bold*, - bullets).
+
+End with a motivational closing line (e.g., Happy coding! Small, consistent progress leads to big results.).
+"""
+        ai_analysis = self._get_ai_analysis(prompt)
         # Send employee reminders if needed
         if employees_to_remind:
             print(f"Sending reminders to: {', '.join(employees_to_remind)}")
-            self.send_employee_reminder(employees_to_remind)
+            self.send_employee_reminder(employees_to_remind, ai_analysis)
         else:
             print(
                 "No employee reminders needed - all timesheets are properly submitted"
             )
+            self.send_employee_reminder([], ai_analysis)
 
         print("\n" + "=" * 50)
         print("VERIFICATION SUMMARY")
