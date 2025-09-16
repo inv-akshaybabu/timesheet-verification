@@ -85,3 +85,8 @@ SHEET_DATA_RANGE = 'A1:K150'  # Adjust end row as needed
 
 # Number of rows to check after finding a date (configurable)
 ROWS_TO_CHECK_AFTER_DATE = 5  # Change this number as needed
+
+# Jira Configuration
+JIRA_URL = os.getenv('JIRA_URL')
+JIRA_USERNAME = os.getenv('JIRA_USERNAME')
+JIRA_API_TOKEN = os.getenv('JIRA_API_TOKEN')

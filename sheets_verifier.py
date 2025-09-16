@@ -6,6 +6,7 @@ from google.oauth2 import service_account
 from openai import OpenAI
 
 from config import *
+from rss_feed import RSSFeedAggregator
 
 
 class SheetsVerifier:
@@ -544,24 +545,8 @@ Use unicode symbols like ├ and └ for clarity. Sort tasks by start time.
                 summary_message += data[0] + "❌ Not Added \n"
             else:
                 summary_message += data + "\n"
-        prompt = """
-You are a friendly tech news bot for our developer group chat. Generate a short daily update focused on full-stack development.
-
-Guidelines:
-
-Include 3–4 key updates (latest releases, tools, frameworks, or best practices).
-
-Format each as a bullet with an emoji + short bolded title + one-line explanation.
-
-After each update, add a reference link in parentheses with the official source (e.g., release notes, docs, blog).
-
-Keep it clear, concise, and under 150 words.
-
-Use Google Chat–friendly formatting (*bold*, - bullets).
-
-End with a motivational closing line (e.g., Happy coding! Small, consistent progress leads to big results.).
-"""
-        ai_analysis = self._get_ai_analysis(prompt)
+        rss_aggregator = RSSFeedAggregator()
+        ai_analysis = rss_aggregator.generate_linkedin_post()
         # Send employee reminders if needed
         if employees_to_remind:
             print(f"Sending reminders to: {', '.join(employees_to_remind)}")
