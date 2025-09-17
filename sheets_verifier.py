@@ -127,6 +127,13 @@ class SheetsVerifier:
                 rows_to_check = (
                     ROWS_TO_CHECK_AFTER_DATE + 1
                 )  # +1 to include the current row
+                
+                # First, check if the first row has total_duration (merged cell case)
+                first_row = sheet_data[i]
+                merged_total_duration = ""
+                if len(first_row) > 9:  # Column J
+                    merged_total_duration = str(first_row[9]).strip()
+                
                 for j in range(i, min(i + rows_to_check, len(sheet_data))):
                     task_row = sheet_data[j]
                     if len(task_row) == 0:
@@ -171,6 +178,10 @@ class SheetsVerifier:
                             task_row[10] if len(task_row) > 10 else ""
                         ),  # Column K
                     }
+                    
+                    # If this entry doesn't have total_duration but we found it in merged cell, use it
+                    if not entry["total_duration"].strip() and merged_total_duration:
+                        entry["total_duration"] = merged_total_duration
 
                     # Only add entries that have meaningful task details
                     if entry["task_details"].strip() or entry["module_area"].strip():
