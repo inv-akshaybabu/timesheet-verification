@@ -6,7 +6,7 @@ from google.oauth2 import service_account
 from openai import OpenAI
 
 from config import *
-from rss_feed import RSSFeedAggregator
+from rss_feed import CategorizedRSSFeedAggregator
 
 
 class SheetsVerifier:
@@ -127,13 +127,13 @@ class SheetsVerifier:
                 rows_to_check = (
                     ROWS_TO_CHECK_AFTER_DATE + 1
                 )  # +1 to include the current row
-                
+
                 # First, check if the first row has total_duration (merged cell case)
                 first_row = sheet_data[i]
                 merged_total_duration = ""
                 if len(first_row) > 9:  # Column J
                     merged_total_duration = str(first_row[9]).strip()
-                
+
                 for j in range(i, min(i + rows_to_check, len(sheet_data))):
                     task_row = sheet_data[j]
                     if len(task_row) == 0:
@@ -178,7 +178,7 @@ class SheetsVerifier:
                             task_row[10] if len(task_row) > 10 else ""
                         ),  # Column K
                     }
-                    
+
                     # If this entry doesn't have total_duration but we found it in merged cell, use it
                     if not entry["total_duration"].strip() and merged_total_duration:
                         entry["total_duration"] = merged_total_duration
@@ -494,7 +494,7 @@ Use unicode symbols like ├ and └ for clarity. Sort tasks by start time.
             print(f"Error sending message to Google Chat: {e}")
             return False
 
-    def send_employee_reminder(self, employees_to_remind,ai_message):
+    def send_employee_reminder(self, employees_to_remind):
         """Send reminder message to employees who haven't submitted timesheets"""
         if  not EMPLOYEE_ALERT_WEBHOOK_URL:
             return False
@@ -519,19 +519,9 @@ Use unicode symbols like ├ and └ for clarity. Sort tasks by start time.
         if employee_mentions:
             message = f'Dear {", ".join(employee_mentions)},\n\n'
             message += "\nPlease update your timesheet for the last working day. ✅"
-        else:
-            message = "Dear team,\n\n"
-        if ai_message:
-            message += f"\n📢 Dev News {self.get_current_day()}"
-            message += "\n"
-            message += "*" * 95
-            message += "\n"
-            message += ai_message
-        else:
-            message += "\nNo Dev News for today"
 
-        # Send message with mentions if available
-        return self.send_google_chat_message(message, EMPLOYEE_ALERT_WEBHOOK_URL)
+            # Send message with mentions if available
+            return self.send_google_chat_message(message, EMPLOYEE_ALERT_WEBHOOK_URL)
 
     def run_daily_verification(self):
         """Main method to run the daily verification process"""
@@ -556,17 +546,27 @@ Use unicode symbols like ├ and └ for clarity. Sort tasks by start time.
                 summary_message += data[0] + "❌ Not Added \n"
             else:
                 summary_message += data + "\n"
-        rss_aggregator = RSSFeedAggregator()
-        ai_analysis = rss_aggregator.generate_linkedin_post()
+        rss_aggregator = CategorizedRSSFeedAggregator()
+        category = rss_aggregator.get_current_day_category()
+        picked_articles = rss_aggregator.get_random_articles(5, category)
+        if picked_articles:
+            print(f"\n✅ Found {len(picked_articles)} articles:")
+            for i, article in enumerate(picked_articles, 1):
+                print(f"{i}. {article['title'][:80]}...")
+                print(f"   🔗 {article['link']}")
+        else:
+            print("❌ No new articles found (all may have been sent before)")
+        linkedin_post = rss_aggregator.generate_linkedin_post(5, category)
+
         # Send employee reminders if needed
         if employees_to_remind:
             print(f"Sending reminders to: {', '.join(employees_to_remind)}")
-            self.send_employee_reminder(employees_to_remind, ai_analysis)
+            self.send_employee_reminder(employees_to_remind)
         else:
             print(
                 "No employee reminders needed - all timesheets are properly submitted"
             )
-            self.send_employee_reminder([], ai_analysis)
+        self.send_google_chat_message(linkedin_post)
 
         print("\n" + "=" * 50)
         print("VERIFICATION SUMMARY")
