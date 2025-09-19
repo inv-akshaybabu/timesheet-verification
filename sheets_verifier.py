@@ -566,7 +566,7 @@ Use unicode symbols like ├ and └ for clarity. Sort tasks by start time.
             print(
                 "No employee reminders needed - all timesheets are properly submitted"
             )
-        self.send_google_chat_message(linkedin_post)
+        self.send_google_chat_message(linkedin_post,EMPLOYEE_ALERT_WEBHOOK_URL)
 
         print("\n" + "=" * 50)
         print("VERIFICATION SUMMARY")
