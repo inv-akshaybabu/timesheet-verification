@@ -4,11 +4,6 @@ on:
   schedule:
     - cron: '0 10 * * *'
   workflow_dispatch:
-env:
-  TEST_MODE: ${{ secrets.TEST_MODE }}
-  EMPLOYEE_ALERT_WEBHOOK_URL: ${{ secrets.EMPLOYEE_ALERT_WEBHOOK_URL }}
-  GOOGLE_CHAT_WEBHOOK_URL: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
-  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 
 jobs:
   run-verifier:
@@ -22,10 +17,15 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: pip install -r requirements.txt
 
       - name: Run sheet verifier
+        env:
+          TEST_MODE: ${{ secrets.TEST_MODE }}
+          EMPLOYEE_ALERT_WEBHOOK_URL: ${{ secrets.EMPLOYEE_ALERT_WEBHOOK_URL }}
+          GOOGLE_CHAT_WEBHOOK_URL: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: python sheets_verifier.py
