@@ -1,0 +1,31 @@
+name: Daily Sheet Verifier
+
+on:
+  schedule:
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+env:
+  TEST_MODE: ${{ secrets.TEST_MODE }}
+  EMPLOYEE_ALERT_WEBHOOK_URL: ${{ secrets.EMPLOYEE_ALERT_WEBHOOK_URL }}
+  GOOGLE_CHAT_WEBHOOK_URL: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+
+jobs:
+  run-verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (feature/intial-setups)
+        uses: actions/checkout@v4
+        with:
+          ref: feature/intial-setups
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run sheet verifier
+        run: python sheet_verifier.py
