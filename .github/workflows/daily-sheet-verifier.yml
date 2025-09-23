@@ -2,7 +2,7 @@ name: Daily Sheet Verifier
 
 on:
   schedule:
-    - cron: '4 30 * * *'
+    - cron: '30 4 * * *'
   workflow_dispatch:
 
 jobs:
