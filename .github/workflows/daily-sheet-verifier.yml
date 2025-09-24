@@ -9,7 +9,6 @@ jobs:
   run-verifier:
     runs-on: ubuntu-latest
     steps:
-      -
       - name: Checkout repository (feature/intial-setups)
         uses: actions/checkout@v4
         with:
