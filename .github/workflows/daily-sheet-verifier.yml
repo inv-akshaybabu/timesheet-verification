@@ -9,6 +9,7 @@ jobs:
   run-verifier:
     runs-on: ubuntu-latest
     steps:
+      -
       - name: Checkout repository (feature/intial-setups)
         uses: actions/checkout@v4
         with:
@@ -25,6 +26,14 @@ jobs:
       - name: Create accounts.json from secret
         run: echo "${{ secrets.ACCOUNTS_JSON }}" | base64 -d > account.json
 
+      - name: Restore sent_links.json cache
+        uses: actions/cache@v4
+        with:
+          path: sent_links.json
+          key: sent-links-${{ github.run_id }}
+          restore-keys: |
+            sent-links-
+
       - name: Run sheet verifier
         env:
           TEST_MODE: ${{ secrets.TEST_MODE }}
@@ -32,3 +41,9 @@ jobs:
           GOOGLE_CHAT_WEBHOOK_URL: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: python sheets_verifier.py
+
+      - name: Save sent_links.json cache
+        uses: actions/cache@v4
+        with:
+          path: sent_links.json
+          key: sent-links-${{ github.run_id }}
