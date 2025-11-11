@@ -167,8 +167,8 @@ function setupEmployeeSheet(ss, empName, dates) {
   // Set column widths
   sheet.setColumnWidth(1, 30);   // A
   sheet.setColumnWidth(2, 80);   // B - Date
-  sheet.setColumnWidth(3, 420);  // C - Module/Area
-  sheet.setColumnWidth(4, 420);  // D - Task details
+  sheet.setColumnWidth(3, 400);  // C - Module/Area
+  sheet.setColumnWidth(4, 400);  // D - Task details
   sheet.setColumnWidth(5, 100);  // E - Status
   sheet.setColumnWidth(6, 150);  // F - Activity Type
   sheet.setColumnWidth(7, 70);   // G - Start
@@ -241,7 +241,7 @@ function setupEmployeeSheet(ss, empName, dates) {
     // Add task duration formulas for both rows
     for (let offset = 0; offset < 2; offset++) {
       const row = currentRow + offset;
-      const taskFormula = '=IF(AND(G' + row + '<>"",H' + row + '<>""),H' + row + '-G' + row + ',"")';
+      const taskFormula = '=IF(AND(G' + row + '<TIME(12,30,0),H' + row + '>TIME(13,0,0)),H' + row + '-G' + row + '-TIME(0,30,0),H' + row + '-G' + row + ')';
       sheet.getRange(row, 9).setFormula(taskFormula);
     }
     
@@ -254,9 +254,13 @@ function setupEmployeeSheet(ss, empName, dates) {
       .setVerticalAlignment("middle")
       .setFontWeight("bold")
       .setFontSize(11);
-    // Format time columns as duration [h]:mm
-    sheet.getRange(currentRow, 7, 2, 4).setNumberFormat("[h]:mm");
     
+    // Format Start and End as clock time 
+    sheet.getRange(currentRow, 7, 2, 2).setNumberFormat("hh:mm");
+
+    // Format Task and Total as duration hh:mm
+    sheet.getRange(currentRow, 9, 2, 2).setNumberFormat("hh:mm");
+
     // Color weekend rows
     if (isWeekend) {
       sheet.getRange(currentRow, 1, 2, 11).setBackground(WEEKEND_BG);
@@ -302,6 +306,11 @@ function setupEmployeeSheet(ss, empName, dates) {
   
   // Set font size 11 for all data rows (from row 6 to last data row)
   sheet.getRange(6, 1, sheet.getMaxRows() - 5, sheet.getMaxColumns()).setFontSize(11);
+  // Center-align text in column I (Task column)
+  sheet.getRange(6, 7, sheet.getMaxRows() - 5, 3)
+  .setHorizontalAlignment("center")
+  .setVerticalAlignment("middle");
+
   
   Logger.log("✓ " + empName + " completed (" + dates.length + " dates)");
 }
