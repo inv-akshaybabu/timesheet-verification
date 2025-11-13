@@ -110,8 +110,61 @@ function createMonthlyTimesheet(monthName = null, year = null) {
   Logger.log("URL: " + url);
   Logger.log("====================================");
   
+  // Update the config JSON file with new spreadsheet ID
+  updateConfigJson(ss.getId(), monthName, year);
+  
   // Return URL for programmatic use
   return url;
+}
+
+
+/**
+ * Updates or creates a JSON config file with the current spreadsheet ID
+ * This allows Python scripts to read the latest timesheet ID
+ */
+function updateConfigJson(spreadsheetId, monthName, year) {
+  const configFileName = "timesheet_config.json";
+  
+  // Create config object
+  const config = {
+    current_spreadsheet_id: spreadsheetId,
+    month: monthName,
+    year: year,
+    updated_at: new Date().toISOString(),
+    spreadsheet_url: "https://docs.google.com/spreadsheets/d/" + spreadsheetId
+  };
+  
+  const configContent = JSON.stringify(config, null, 2);
+  
+  try {
+    // Check if config file already exists in the destination folder
+    let configFile = null;
+    let folder = DESTINATION_FOLDER_ID ? DriveApp.getFolderById(DESTINATION_FOLDER_ID) : DriveApp.getRootFolder();
+    
+    const existingFiles = folder.getFilesByName(configFileName);
+    if (existingFiles.hasNext()) {
+      // Update existing file
+      configFile = existingFiles.next();
+      configFile.setContent(configContent);
+      Logger.log("✓ Updated existing config file: " + configFile.getId());
+    } else {
+      // Create new file
+      configFile = folder.createFile(configFileName, configContent, MimeType.PLAIN_TEXT);
+      Logger.log("✓ Created new config file: " + configFile.getId());
+    }
+    
+    // Make the config file readable by anyone with the link (or keep it private)
+    // configFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    
+    Logger.log("Config file URL: " + configFile.getUrl());
+    Logger.log("Config file ID: " + configFile.getId());
+    
+    // Store the config file ID in Script Properties for easy access
+    PropertiesService.getScriptProperties().setProperty('CONFIG_FILE_ID', configFile.getId());
+    
+  } catch (err) {
+    Logger.log("ERROR updating config file: " + err);
+  }
 }
 
 

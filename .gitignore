@@ -1,1 +1,25 @@
 /logs/attendance_10am.log
+venv
+
+# Google Cloud Service Account Credentials
+account.json
+timesheet-fetcher.json
+*_credentials.json
+service_account.json
+
+# Environment variables
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
