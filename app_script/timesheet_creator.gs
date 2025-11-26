@@ -32,6 +32,7 @@ const WEEKEND_BG = "#FF9999";  // Light Red 1
 
 // Destination folder ID (optional - leave empty for root Drive)
 const DESTINATION_FOLDER_ID = PropertiesService.getScriptProperties().getProperty('DESTINATION_FOLDER_ID');
+const SERVICE_ACCOUNT = PropertiesService.getScriptProperties().getProperty('SERVICE_ACCOUNT');
 
 
 /**
@@ -146,11 +147,15 @@ function updateConfigJson(spreadsheetId, monthName, year) {
       // Update existing file
       configFile = existingFiles.next();
       configFile.setContent(configContent);
+      configFile.addViewer(SERVICE_ACCOUNT)
+      Logger.log("✓ Created new config file: " + configFile.getId());
       Logger.log("✓ Updated existing config file: " + configFile.getId());
     } else {
       // Create new file
       configFile = folder.createFile(configFileName, configContent, MimeType.PLAIN_TEXT);
+      configFile.addViewer(SERVICE_ACCOUNT)
       Logger.log("✓ Created new config file: " + configFile.getId());
+      Logger.log("✓ Shared config file with: " + SERVICE_ACCOUNT)
     }
     
     // Make the config file readable by anyone with the link (or keep it private)
