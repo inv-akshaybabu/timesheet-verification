@@ -356,9 +356,8 @@ function setupEmployeeSheet(ss, empName, dates) {
   
   // Monthly total formula
   const monthlyFormula = 
-    '=TEXT(INT(SUM(J5:J' + lastDataRow + ')),"0")&":"&' +
-    'TEXT(HOUR(SUM(J5:J' + lastDataRow + ')),"00")&":"&' +
-    'TEXT(MINUTE(SUM(J5:J' + lastDataRow + ')),"00")';
+    '=TEXT(INT(SUM(J6:J' + lastDataRow + '))*24+HOUR(SUM(J6:J' + lastDataRow + ')),"00")&":"&' +
+    'TEXT(MINUTE(SUM(J6:J' + lastDataRow + ')),"00")';
   sheet.getRange(monthlyRow, 10).setFormula(monthlyFormula)
     .setFontWeight("bold");
   
