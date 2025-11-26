@@ -423,7 +423,7 @@ function sendChatNotification(monthName, year, spreadsheetUrl) {
   try {
     // Create the message payload for Google Chat with proper @all mention
     const message = {
-      text: "<users/all> New timesheet for the month of " + monthName + " " + year + ".\n" + spreadsheetUrl
+      text: "<users/all> Timesheet for the month of " + monthName + " " + year + " Generated.\n" + spreadsheetUrl
     };
     
     // Send POST request to webhook
