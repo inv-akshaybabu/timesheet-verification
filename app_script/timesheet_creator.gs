@@ -33,6 +33,7 @@ const WEEKEND_BG = "#FF9999";  // Light Red 1
 // Destination folder ID (optional - leave empty for root Drive)
 const DESTINATION_FOLDER_ID = PropertiesService.getScriptProperties().getProperty('DESTINATION_FOLDER_ID');
 const SERVICE_ACCOUNT = PropertiesService.getScriptProperties().getProperty('SERVICE_ACCOUNT');
+const WEBHOOK_URL = PropertiesService.getScriptProperties().getProperty('WEBHOOK_URL');
 
 
 /**
@@ -113,6 +114,9 @@ function createMonthlyTimesheet(monthName = null, year = null) {
   
   // Update the config JSON file with new spreadsheet ID
   updateConfigJson(ss.getId(), monthName, year);
+  
+  // Send notification to Google Chat
+  sendChatNotification(monthName, year, url);
   
   // Return URL for programmatic use
   return url;
@@ -404,4 +408,42 @@ function testCreateNextMonth() {
   const year = nextMonth.getFullYear();
   
   createMonthlyTimesheet(monthName, year);
+}
+
+
+/**
+ * Send notification to Google Chat when a new timesheet is created
+ */
+function sendChatNotification(monthName, year, spreadsheetUrl) {
+  if (!WEBHOOK_URL) {
+    Logger.log("WEBHOOK_URL not configured in Script Properties. Skipping notification.");
+    return;
+  }
+  
+  try {
+    // Create the message payload for Google Chat with proper @all mention
+    const message = {
+      text: "<users/all> New timesheet for the month of " + monthName + " " + year + ".\n" + spreadsheetUrl
+    };
+    
+    // Send POST request to webhook
+    const options = {
+      method: "post",
+      contentType: "application/json",
+      payload: JSON.stringify(message),
+      muteHttpExceptions: true
+    };
+    
+    const response = UrlFetchApp.fetch(WEBHOOK_URL, options);
+    const responseCode = response.getResponseCode();
+    
+    if (responseCode === 200) {
+      Logger.log("✓ Google Chat notification sent successfully");
+    } else {
+      Logger.log("⚠ Google Chat notification failed with status: " + responseCode);
+      Logger.log("Response: " + response.getContentText());
+    }
+  } catch (err) {
+    Logger.log("ERROR sending Google Chat notification: " + err);
+  }
 }
