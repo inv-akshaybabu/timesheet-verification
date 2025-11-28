@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from fetch_spreadsheet_id import get_latest_spreadsheet_id
 
 load_dotenv()
 
@@ -8,7 +9,8 @@ SERVICE_ACCOUNT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
 # Single Google Sheet ID containing all engineer sheets
-MAIN_SPREADSHEET_ID = '1WdOMkT4QHYEtJJ__3-EuLAfEeWKjRFZpcy4C5HP3QIQ'  # Replace with your main sheet ID
+# This will automatically fetch the latest ID from Google Drive when the module is imported
+MAIN_SPREADSHEET_ID = get_latest_spreadsheet_id(verbose=False)
 
 # Engineer names (these will be used as sheet names within the main spreadsheet)
 ENGINEER_NAMES = [
