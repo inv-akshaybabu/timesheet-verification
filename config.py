@@ -5,7 +5,7 @@ from fetch_spreadsheet_id import get_latest_spreadsheet_id
 load_dotenv()
 
 # Google Sheets Configuration
-SERVICE_ACCOUNT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'account.json')
+SERVICE_ACCOUNT_FILE = os.getenv('GCP_SERVICE_ACCOUNT_JSON')  
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
 # Single Google Sheet ID containing all engineer sheets
