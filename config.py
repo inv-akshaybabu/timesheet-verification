@@ -14,25 +14,20 @@ MAIN_SPREADSHEET_ID = get_latest_spreadsheet_id(verbose=False)
 
 # Engineer names (these will be used as sheet names within the main spreadsheet)
 ENGINEER_NAMES = [
-    'Jinu T J',
-    'Bismillakhan S',
-    'Midhun',
-    'Aravind',
-    'Akhil Mohan',
-    'Akash T K',
-    'Shinoj'
+    'Akshay Babu',
+
     # Add more engineer names as needed
 ]
 
 # Employee Google Chat IDs for mentioning - Add numerical user IDs for proper mentions
 EMPLOYEE_CHAT_IDS = {
-    'Bismillakhan S': '115773514265520053097',  # Replace with actual numerical chat ID
-    'Jinu T J': '115142352767738659510',
-    'Midhun':'108660074852905944786',
-    'Aravind':'107574045682955308493',
-    'Akhil Mohan':'104052864034579334603',
-    'Akash T K':'112652200937440721836',
-    'Shinoj':'117004017244973974527'
+    'Bismillakhan S': '',  # Replace with actual numerical chat ID
+    'Jinu T J': '',
+    'Midhun':'',
+    'Aravind':'',
+    'Akhil Mohan':'',
+    'Akash T K':'',
+    'Shinoj':''
     # Add more employees and their chat IDs like:
     # 'Employee Name': 'their_numerical_chat_id',
 }
