@@ -23,8 +23,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Create account.json from secret
-        run: |
-          printf "%s" "${{ secrets.ACCOUNTS_JSON }}" > account.json
+        run: echo "${{ secrets.ACCOUNTS_JSON }}" | base64 -d > account.json
 
       - name: Restore sent_links.json cache
         uses: actions/cache@v4
