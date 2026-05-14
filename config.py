@@ -14,17 +14,17 @@ MAIN_SPREADSHEET_ID = get_latest_spreadsheet_id(verbose=False)
 
 # Engineer names (these will be used as sheet names within the main spreadsheet)
 ENGINEER_NAMES = [
-    'Abdul Fahad Rahman',
+    # 'Abdul Fahad Rahman',
     'Adarsh Varghese K.J',
     'Akshay Babu',
     'Amal Anand',
     'Angaliya Vincent',
     'Anjusha P',
-    'Anusha Ramesh',
+    # 'Anusha Ramesh',
     'Betsy M Baby',
     'Navaneeth Krishna',
     'Sarath U',
-    'Shilpa Modi',
+    # 'Shilpa Modi',
     'Sooraj V Rajan',
     'Vishnu B'
     # Add more engineer names as needed
