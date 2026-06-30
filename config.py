@@ -15,7 +15,7 @@ MAIN_SPREADSHEET_ID = get_latest_spreadsheet_id(verbose=False)
 # Engineer names (these will be used as sheet names within the main spreadsheet)
 ENGINEER_NAMES = [
     # 'Abdul Fahad Rahman',
-    'Adarsh Varghese K.J',
+    # 'Adarsh Varghese K.J',
     'Akshay Babu',
     'Amal Anand',
     'Angaliya Vincent',
