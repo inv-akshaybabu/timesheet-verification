@@ -26,7 +26,8 @@ ENGINEER_NAMES = [
     'Sarath U',
     # 'Shilpa Modi',
     'Sooraj V Rajan',
-    'Vishnu B'
+    'Vishnu B',
+    'Steeve Manual K V'
     # Add more engineer names as needed
 ]
 
@@ -44,7 +45,8 @@ EMPLOYEE_CHAT_IDS = {
     'Sarath U':'107267410676956151194',
     'Shilpa Modi': '100266655928069373143',
     'Sooraj V Rajan':'111321564331554271713',
-    'Vishnu B':'106329475361764589052'
+    'Vishnu B':'106329475361764589052',
+    'Steeve Manual K V':'105766495419266954987'
     # Add more employees and their chat IDs like:
     # 'Employee Name': 'their_numerical_chat_id',
 }
