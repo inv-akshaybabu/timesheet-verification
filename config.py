@@ -23,7 +23,7 @@ ENGINEER_NAMES = [
     'Anusha Ramesh',
     'Betsy M Baby',
     'Navaneeth Krishna',
-    'Sarath U',
+    # 'Sarath U',
     # 'Shilpa Modi',
     'Sooraj V Rajan',
     'Vishnu B',
